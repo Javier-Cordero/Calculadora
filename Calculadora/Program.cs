@@ -72,7 +72,7 @@
             {
                 case 2: Binario(signo); break;
                 case 8: Octal(signo); break;
-                case 16: Console.WriteLine("Hexadecimal"); break;
+                case 16: Hexadecimal(signo); break;
                 default: Console.WriteLine("base no permitida"); break;
             }
         }
@@ -84,7 +84,7 @@
             {
                 case 2: Binario(signo); break;
                 case 8: Octal(signo); break;
-                case 16: Console.WriteLine("Hexadecimal"); break;
+                case 16: Hexadecimal(signo); break;
                 default: Console.WriteLine("base no permitida"); break;
             }
         }
@@ -197,6 +197,7 @@
                     default: Console.WriteLine($"Error: El carácter '{numero2[i]}' no es un dígito octal."); break;
                 }
             }
+            Console.WriteLine($"Vector 1 cargado: {string.Join("", vector1)} | Vector 2 cargado: {string.Join("", vector2)}");
             //Sumar de vectores
             if (signo == '+')
             {
@@ -233,7 +234,117 @@
                     }
                 }
             }
+            Console.WriteLine($"Resultado: {string.Join("", resultado)}");
+        }
+        static void Hexadecimal(char signo)
+        {
+            // Llenar vector 1
+            Console.WriteLine("Ingrese el primer número hexadecimal (8 bits):");
+            string numero1 = Console.ReadLine() ?? "";
+            numero1 = numero1.ToUpper();
+            // Completar con ceros a la izquierda hasta 8 bits
+            numero1 = numero1.PadLeft(8, '0');
+            if (numero1.Length > 8) Console.WriteLine("Error: Debe ingresar exactamente 8 bits.");
+            for (int i = 0; i < numero1.Length; i++)
+            {
+                switch (numero1[i])
+                {
+                    case '0': vector1[i] = 0; break;
+                    case '1': vector1[i] = 1; break;
+                    case '2': vector1[i] = 2; break;
+                    case '3': vector1[i] = 3; break;
+                    case '4': vector1[i] = 4; break;
+                    case '5': vector1[i] = 5; break;
+                    case '6': vector1[i] = 6; break;
+                    case '7': vector1[i] = 7; break;
+                    case '8': vector1[i] = 8; break;
+                    case '9': vector1[i] = 9; break;
+                    case 'A': vector1[i] = 10; break;
+                    case 'B': vector1[i] = 11; break;
+                    case 'C': vector1[i] = 12; break;
+                    case 'D': vector1[i] = 13; break;
+                    case 'E': vector1[i] = 14; break;
+                    case 'F': vector1[i] = 15; break;
+                    default: Console.WriteLine($"Error: El carácter '{numero1[i]}' no es un dígito hexadecimal."); break;
+                }
+            }
+            // Llenar vector 2
+            Console.WriteLine("Ingrese el segundo número hexadecimal (8 bits):");
+            string numero2 = Console.ReadLine() ?? "";
+            numero2 = numero2.ToUpper();
+            // Completar con ceros a la izquierda hasta 8 bits
+            numero2 = numero2.PadLeft(8, '0');
+            if (numero2.Length > 8) Console.WriteLine("Error: Debe ingresar exactamente 8 bits.");
+            for (int i = 0; i < numero2.Length; i++)
+            {
+                switch (numero2[i])
+                {
+                    case '0': vector2[i] = 0; break;
+                    case '1': vector2[i] = 1; break;
+                    case '2': vector2[i] = 2; break;
+                    case '3': vector2[i] = 3; break;
+                    case '4': vector2[i] = 4; break;
+                    case '5': vector2[i] = 5; break;
+                    case '6': vector2[i] = 6; break;
+                    case '7': vector2[i] = 7; break;
+                    case '8': vector2[i] = 8; break;
+                    case '9': vector2[i] = 9; break;
+                    case 'A': vector2[i] = 10; break;
+                    case 'B': vector2[i] = 11; break;
+                    case 'C': vector2[i] = 12; break;
+                    case 'D': vector2[i] = 13; break;
+                    case 'E': vector2[i] = 14; break;
+                    case 'F': vector2[i] = 15; break;
+                    default: Console.WriteLine($"Error: El carácter '{numero2[i]}' no es un dígito hexadecimal."); break;
+                }
+            }
             Console.WriteLine($"Vector 1 cargado: {string.Join("", vector1)} | Vector 2 cargado: {string.Join("", vector2)}");
+            //Sumar de vectores
+            if (signo == '+')
+            {
+                int acarreo = 0;
+                for (int i = 7; i >= 0; i--)
+                {
+                    int suma = vector1[i] + vector2[i] + acarreo;
+                    resultado[i] = suma % 16;
+                    acarreo = suma / 16;
+                }
+                if (acarreo > 0)
+                {
+                    int[] vectorExpandido = new int[9];
+                    vectorExpandido[0] = acarreo;
+                    for (int i = 0; i < 8; i++) vectorExpandido[i + 1] = resultado[i];
+                    resultado = vectorExpandido;
+                }
+            }
+            else //Resta de vectores
+            {
+                int prestamo = 0;
+                for (int i = 7; i >= 0; i--)
+                {
+                    int resta = vector1[i] - vector2[i] - prestamo;
+                    if (resta < 0)
+                    {
+                        resultado[i] = resta + 16;
+                        prestamo = 1;
+                    }
+                    else
+                    {
+                        resultado[i] = resta;
+                        prestamo = 0;
+                    }
+                }
+            }
+            for (int i = 0;i < resultado.Length;i++)
+            {
+
+            }
+            string hexResultado = "";
+            for (int i = 0; i < resultado.Length; i++)
+            {
+                hexResultado += resultado[i].ToString("X"); // "X" para mayúsculas (A-F)
+            }
+            Console.WriteLine($"Resultado: {hexResultado}");
         }
     }
 }
