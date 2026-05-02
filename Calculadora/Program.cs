@@ -5,18 +5,12 @@
         static int[] vector1 = new int[8], vector2 = new int[8], resultado = new int[8];
         static void Main(string[] args)
         {
-            byte menu;
+            string[] opciones = { "Sumar", "Restar", "Salir" };
+            int menu;
             do
             {
-                Console.WriteLine("╔══════════════════════════════════════════════════════════════════╗");
-                Console.WriteLine("║                        CALCULADORA BASICA                        ║");
-                Console.WriteLine("║                             GRUPO #4                             ║");
-                Console.WriteLine("╚══════════════════════════════════════════════════════════════════╝");
-                Console.WriteLine(" 1. Sumar ");
-                Console.WriteLine(" 2. Restar ");
-                Console.WriteLine(" 3. Salir ");
-                Console.Write("ELIJA UNA OPCION: ");
-                menu = Convert.ToByte(Console.ReadLine());
+                menu = MostrarMenu("CALCULADORA BASICA", opciones);
+                if (menu == -1) continue;
                 switch (menu)
                 {
                     case 1: Sumar(); break;
@@ -29,119 +23,101 @@
         }
         static int SeleccionarBase()
         {
-            byte menu;
-            int BaseSeleccionada = 0;
-            bool valido = false;
+            string[] opciones = { "Binario", "Octal", "Hexadecimal", "Salir" };
+            int menu;
             do
             {
-                Console.Clear();
-                Console.WriteLine("╔══════════════════════════════════════════════════════════════════╗");
-                Console.WriteLine("║                        CALCULADORA BASICA                        ║");
-                Console.WriteLine("║                         SELECCIONAR BASE                         ║");
-                Console.WriteLine("╚══════════════════════════════════════════════════════════════════╝");
-                Console.WriteLine(" 1. Binario (Base 2) ");
-                Console.WriteLine(" 2. Octal (Base 8) ");
-                Console.WriteLine(" 3. Hexadecimal (Base 16) ");
-                Console.WriteLine(" 4. Salir ");
-                Console.Write("ELIJA UNA OPCION: ");
-                menu = Convert.ToByte(Console.ReadLine());
+                menu = MostrarMenu("SELECCIONAR BASE", opciones);
+                if (menu == -1) continue;
                 switch (menu)
                 {
-                    case 1:
-                        BaseSeleccionada = 2;
-                        valido = true;
-                        break;
-                    case 2:
-                        BaseSeleccionada = 8;
-                        valido = true;
-                        break;
-                    case 3:
-                        BaseSeleccionada = 16;
-                        valido = true;
-                        break;
+                    case 1: return 2;
+                    case 2: return 8;
+                    case 3: return 16;
+                    case 4: return 0;
                     default: Console.WriteLine("opcion invalida"); break;
                 }
+            } while (true);
+        }
+        static int MostrarMenu(string titulo, string[] opciones)
+        {
+            Console.Clear();
+            Console.WriteLine("╔══════════════════════════════════════════════════════════════════╗");
+            Console.WriteLine($"║                   {titulo,-46} ║");
+            Console.WriteLine("╚══════════════════════════════════════════════════════════════════╝");
+            for (int i = 0; i < opciones.Length; i++) Console.WriteLine($" {i + 1}. {opciones[i]}");
+            Console.Write("ELIJA UNA OPCION: ");
+            string input = Console.ReadLine() ?? "";
+            return int.TryParse(input, out int opcion) ? opcion : -1;
+        }
+        static void Operar(char signo, string operacion)
+        {
+            Console.WriteLine(operacion.ToUpper());
+            switch (SeleccionarBase())
+            {
+                case 2: Binario(signo); break;
+                case 8: Octal(signo); break;
+                case 16: Hexadecimal(signo); break;
+                default: Console.WriteLine("Base no permitida"); break;
+            }
+        }
+        static string PedirNumero(string tipo, string caracteresValidos)
+        {
+            string numero;
+            bool valido;
+            do
+            {
+                Console.WriteLine($"Ingrese el número {tipo} (maximo 8bits):");
+                numero = Console.ReadLine()?.ToUpper() ?? "";
+                if (string.IsNullOrEmpty(numero))
+                {
+                    Console.WriteLine("Error: Entrada vacía. Intente de nuevo.");
+                    valido = false;
+                }
+                else if (numero.Length > 8)
+                {
+                    Console.WriteLine($"Error: Máximo 8 bits permitidos.");
+                    valido = false;
+                }
+                else if (numero.All(c => caracteresValidos.Contains(c))) valido = true;
+                else
+                {
+                    Console.WriteLine($"Error: Solo se permiten caracteres: {caracteresValidos}");
+                    valido = false;
+                }
             } while (!valido);
-            return BaseSeleccionada;
+            return numero.PadLeft(8, '0');
         }
-        static void Sumar()
+        static void Sumar() => Operar('+', "sumar vectores");
+        static void Restar() => Operar('-', "restar vectores");
+        static void OperarVectores(char signo, int baseSistema)
         {
-            Console.WriteLine("SUMAR VECTORES");
-            char signo = '+';
-            switch (SeleccionarBase())
-            {
-                case 2: Binario(signo); break;
-                case 8: Octal(signo); break;
-                case 16: Hexadecimal(signo); break;
-                default: Console.WriteLine("base no permitida"); break;
-            }
-        }
-        static void Restar()
-        {
-            Console.WriteLine("RESTAR");
-            char signo = '-';
-            switch (SeleccionarBase())
-            {
-                case 2: Binario(signo); break;
-                case 8: Octal(signo); break;
-                case 16: Hexadecimal(signo); break;
-                default: Console.WriteLine("base no permitida"); break;
-            }
-        }
-        static void Binario(char signo)
-        {
-            // Llenar vector 1
-            Console.WriteLine("Ingrese el primer número binario (8 bits):");
-            string numero1 = Console.ReadLine() ?? "";
-            // Completar con ceros a la izquierda hasta 8 bits
-            numero1 = numero1.PadLeft(8, '0');
-            if (numero1.Length > 8) Console.WriteLine("Error: Debe ingresar exactamente 8 bits.");
-            for (int i = 0; i < numero1.Length; i++)
-            {
-                if (numero1[i] == '0') vector1[i] = 0;
-                else if (numero1[i] == '1') vector1[i] = 1;
-                else Console.WriteLine($"Error: El carácter '{numero1[i]}' no es un dígito binario.");
-            }
-            // Llenar vector 2
-            Console.WriteLine("Ingrese el segundo número binario (8 bits):");
-            string numero2 = Console.ReadLine() ?? "";
-            // Completar con ceros a la izquierda hasta 8 bits
-            numero2 = numero2.PadLeft(8, '0');
-            if (numero2.Length > 8) Console.WriteLine("Error: Debe ingresar exactamente 8 bits.");
-            for (int i = 0; i < numero2.Length; i++)
-            {
-                if (numero2[i] == '0') vector2[i] = 0;
-                else if (numero2[i] == '1') vector2[i] = 1;
-                else Console.WriteLine($"Error: El carácter '{numero2[i]}' no es un dígito binario.");
-            }
-            Console.WriteLine($"Vector 1 cargado: {string.Join("", vector1)} | Vector 2 cargado: {string.Join("", vector2)}");
-            //Sumar de vectores
+            int[] resultado = new int[8];
+            int acarreo = 0, prestamo = 0;
             if (signo == '+')
             {
-                int acarreo = 0;
                 for (int i = 7; i >= 0; i--)
                 {
                     int suma = vector1[i] + vector2[i] + acarreo;
-                    resultado[i] = suma % 2;
-                    acarreo = suma / 2;
+                    resultado[i] = suma % baseSistema;
+                    acarreo = suma / baseSistema;
                 }
                 if (acarreo > 0)
                 {
                     int[] vectorExpandido = new int[9];
                     vectorExpandido[0] = acarreo;
-                    for (int i = 0; i < 8; i++) vectorExpandido[i + 1] = resultado[i];
+                    Array.Copy(resultado, 0, vectorExpandido, 1, 8);
                     resultado = vectorExpandido;
                 }
             }
-            else //Resta de vectores
+            else // signo == '-'
             {
-                int prestamo = 0;
                 for (int i = 7; i >= 0; i--)
                 {
                     int resta = vector1[i] - vector2[i] - prestamo;
                     if (resta < 0)
                     {
-                        resultado[i] = resta + 2;
+                        resultado[i] = resta + baseSistema;
                         prestamo = 1;
                     }
                     else
@@ -151,100 +127,37 @@
                     }
                 }
             }
+
             Console.WriteLine($"Resultado: {string.Join("", resultado)}");
+        } 
+        static void Binario(char signo)
+        {
+            // Llenar vector 1
+            string numero1 = PedirNumero("Binario", "01");
+            for (int i = 0; i < numero1.Length; i++) vector1[i] = numero1[i] - '0';
+            // Llenar vector 2
+            string numero2 = PedirNumero("Binario", "01");
+            for (int i = 0; i < numero2.Length; i++) vector2[i] = numero2[i] - '0';
+            Console.WriteLine($"Vector 1 cargado: {string.Join("", vector1)} | Vector 2 cargado: {string.Join("", vector2)}");
+            OperarVectores(signo, 2);
+            Console.ReadKey();
         }
         static void Octal(char signo)
         {
             // Llenar vector 1
-            Console.WriteLine("Ingrese el primer número octal (8 bits):");
-            string numero1 = Console.ReadLine() ?? "";
-            // Completar con ceros a la izquierda hasta 8 bits
-            numero1 = numero1.PadLeft(8, '0');
-            if (numero1.Length > 8) Console.WriteLine("Error: Debe ingresar exactamente 8 bits.");
-            for (int i = 0; i < numero1.Length; i++)
-            {
-                switch(numero1[i])
-                {
-                    case '0': vector1[i] = 0; break;
-                    case '1': vector1[i] = 1; break;
-                    case '2': vector1[i] = 2; break;
-                    case '3': vector1[i] = 3; break;
-                    case '4': vector1[i] = 4; break;
-                    case '5': vector1[i] = 5; break;
-                    case '6': vector1[i] = 6; break;
-                    case '7': vector1[i] = 7; break;
-                    default: Console.WriteLine($"Error: El carácter '{numero1[i]}' no es un dígito octal."); break;
-                }
-            }
+            string numero1 = PedirNumero("Octal", "01234567");
+            for (int i = 0; i < numero1.Length; i++) vector1[i] = numero1[i] - '0';
             // Llenar vector 2
-            Console.WriteLine("Ingrese el segundo número octal (8 bits):");
-            string numero2 = Console.ReadLine() ?? "";
-            // Completar con ceros a la izquierda hasta 8 bits
-            numero2 = numero2.PadLeft(8, '0');
-            if (numero2.Length > 8) Console.WriteLine("Error: Debe ingresar exactamente 8 bits.");
-            for (int i = 0; i < numero2.Length; i++)
-            {
-                switch (numero2[i])
-                {
-                    case '0': vector2[i] = 0; break;
-                    case '1': vector2[i] = 1; break;
-                    case '2': vector2[i] = 2; break;
-                    case '3': vector2[i] = 3; break;
-                    case '4': vector2[i] = 4; break;
-                    case '5': vector2[i] = 5; break;
-                    case '6': vector2[i] = 6; break;
-                    case '7': vector2[i] = 7; break;
-                    default: Console.WriteLine($"Error: El carácter '{numero2[i]}' no es un dígito octal."); break;
-                }
-            }
+            string numero2 = PedirNumero("Octal", "01234567");
+            for (int i = 0; i < numero2.Length; i++) vector2[i] = numero2[i] - '0';
             Console.WriteLine($"Vector 1 cargado: {string.Join("", vector1)} | Vector 2 cargado: {string.Join("", vector2)}");
-            //Sumar de vectores
-            if (signo == '+')
-            {
-                int acarreo = 0;
-                for (int i = 7; i >= 0; i--)
-                {
-                    int suma = vector1[i] + vector2[i] + acarreo;
-                    resultado[i] = suma % 8;
-                    acarreo = suma / 8;
-                }
-                if (acarreo > 0)
-                {
-                    int[] vectorExpandido = new int[9];
-                    vectorExpandido[0] = acarreo;
-                    for (int i = 0; i < 8; i++) vectorExpandido[i + 1] = resultado[i];
-                    resultado = vectorExpandido;
-                }
-            }
-            else //Resta de vectores
-            {
-                int prestamo = 0;
-                for (int i = 7; i >= 0; i--)
-                {
-                    int resta = vector1[i] - vector2[i] - prestamo;
-                    if (resta < 0)
-                    {
-                        resultado[i] = resta + 8;
-                        prestamo = 1;
-                    }
-                    else
-                    {
-                        resultado[i] = resta;
-                        prestamo = 0;
-                    }
-                }
-            }
-            Console.WriteLine($"Resultado: {string.Join("", resultado)}");
+            OperarVectores(signo, 8);
+            Console.ReadKey();
         }
         static void Hexadecimal(char signo)
         {
             // Llenar vector 1
-            Console.WriteLine("Ingrese el primer número hexadecimal (8 bits):");
-            string numero1 = Console.ReadLine() ?? "";
-            numero1 = numero1.ToUpper();
-            // Completar con ceros a la izquierda hasta 8 bits
-            numero1 = numero1.PadLeft(8, '0');
-            if (numero1.Length > 8) Console.WriteLine("Error: Debe ingresar exactamente 8 bits.");
+            string numero1 = PedirNumero("Hexadecimal", "0123456789ABCDEF");
             for (int i = 0; i < numero1.Length; i++)
             {
                 switch (numero1[i])
@@ -265,16 +178,10 @@
                     case 'D': vector1[i] = 13; break;
                     case 'E': vector1[i] = 14; break;
                     case 'F': vector1[i] = 15; break;
-                    default: Console.WriteLine($"Error: El carácter '{numero1[i]}' no es un dígito hexadecimal."); break;
                 }
             }
             // Llenar vector 2
-            Console.WriteLine("Ingrese el segundo número hexadecimal (8 bits):");
-            string numero2 = Console.ReadLine() ?? "";
-            numero2 = numero2.ToUpper();
-            // Completar con ceros a la izquierda hasta 8 bits
-            numero2 = numero2.PadLeft(8, '0');
-            if (numero2.Length > 8) Console.WriteLine("Error: Debe ingresar exactamente 8 bits.");
+            string numero2 = PedirNumero("Hexadecimal", "0123456789ABCDEF");
             for (int i = 0; i < numero2.Length; i++)
             {
                 switch (numero2[i])
@@ -295,56 +202,11 @@
                     case 'D': vector2[i] = 13; break;
                     case 'E': vector2[i] = 14; break;
                     case 'F': vector2[i] = 15; break;
-                    default: Console.WriteLine($"Error: El carácter '{numero2[i]}' no es un dígito hexadecimal."); break;
                 }
             }
             Console.WriteLine($"Vector 1 cargado: {string.Join("", vector1)} | Vector 2 cargado: {string.Join("", vector2)}");
-            //Sumar de vectores
-            if (signo == '+')
-            {
-                int acarreo = 0;
-                for (int i = 7; i >= 0; i--)
-                {
-                    int suma = vector1[i] + vector2[i] + acarreo;
-                    resultado[i] = suma % 16;
-                    acarreo = suma / 16;
-                }
-                if (acarreo > 0)
-                {
-                    int[] vectorExpandido = new int[9];
-                    vectorExpandido[0] = acarreo;
-                    for (int i = 0; i < 8; i++) vectorExpandido[i + 1] = resultado[i];
-                    resultado = vectorExpandido;
-                }
-            }
-            else //Resta de vectores
-            {
-                int prestamo = 0;
-                for (int i = 7; i >= 0; i--)
-                {
-                    int resta = vector1[i] - vector2[i] - prestamo;
-                    if (resta < 0)
-                    {
-                        resultado[i] = resta + 16;
-                        prestamo = 1;
-                    }
-                    else
-                    {
-                        resultado[i] = resta;
-                        prestamo = 0;
-                    }
-                }
-            }
-            for (int i = 0;i < resultado.Length;i++)
-            {
-
-            }
-            string hexResultado = "";
-            for (int i = 0; i < resultado.Length; i++)
-            {
-                hexResultado += resultado[i].ToString("X"); // "X" para mayúsculas (A-F)
-            }
-            Console.WriteLine($"Resultado: {hexResultado}");
+            OperarVectores(signo, 16);
+            Console.ReadKey();
         }
     }
 }
